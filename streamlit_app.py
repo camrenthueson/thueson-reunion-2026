@@ -898,4 +898,4 @@ else:
     elif choice == "Mafia Game":
         display_mafia()
     elif choice == "Admin Portal":
-        display_admin()
+        display_admin(state)
