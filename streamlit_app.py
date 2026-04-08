@@ -278,7 +278,7 @@ def display_admin(state):
     if st.button("Update Global Mission Rules"):
         state["disabled_types"] = disabled
         save_state(state)
-        st.toast("Rules Updated!")
+        st.toast("Rules Updated!", icon="✅")
         time.sleep(1.0)
         st.rerun()
     
