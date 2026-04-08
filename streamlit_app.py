@@ -176,9 +176,11 @@ def display_dashboard():
                             player_data["completed_ids"].append(m_data["id"])
                             state["audit_log"].insert(0, f"🧠 {user} answered Trivia correctly (+{win_val})")
                             st.success("Correct!")
+                            time.sleep(1.0)
                         else:
                             # FAILURE: No points, but NOT added to completed_ids (will return later)
                             st.error("Wrong!")
+                            time.sleep(1.0)
                             state["audit_log"].insert(0, f"❌ {user} missed a Trivia question.")
 
                         # Either way, clear the slot and save
