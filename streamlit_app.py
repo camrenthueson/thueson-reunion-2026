@@ -214,8 +214,15 @@ def display_dashboard():
                     st.rerun()
 
                 with c3:
-                    target = st.selectbox("Target", ["Select"] + [p for p in state["players"] if p != user],
-                                          key=f"t_{slot_key}")
+                    # Filter: Only include players who are NOT admins and NOT judges
+                    potential_targets = [
+                        p for p, info in state["players"].items() 
+                        if p != user and not info.get("is_admin") and not info.get("is_judge")
+                    target = st.selectbox(
+                        "Pass To", 
+                        ["Select"] + potential_targets,
+                        key=f"t_{slot_key}"
+                    )
                     if st.button(f"Pass 🏹", key=f"p_{slot_key}"):
                         if target != "Select" and player_data["stars"] >= pass_cost:
                             player_data["stars"] -= pass_cost
