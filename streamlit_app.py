@@ -626,6 +626,14 @@ def display_mafia():
     # --- 4. LIVE GAME UI (Only reached if active AND alive) ---
     with st.expander("🔒 Tap to Reveal Your Secret Identity"):
         st.caption(f"Your Secret Role: {user_role}")
+        # 2. TEAM INTEL
+        if user_role == "Mafia":
+            teammates = [p for p, d in state["players"].items() if d.get("role") == "Mafia"]
+            st.warning(f"💀 **MAFIA TEAM:** {', '.join(teammates)}")
+        elif user_role == "Citizen":
+            st.info("🕵️ **CITIZEN:** Try to figure out who the Mafia is!")
+    
+        
     
     current_phase = state.get("mafia_phase", "Day")
 
@@ -654,13 +662,6 @@ def display_mafia():
             * **Winning Team (Alive):** +40 pts / +3 ⭐
             * **Winning Team (Ghost):** +10 pts / +1 ⭐
             """)
-
-    # 2. TEAM INTEL
-    if user_role == "Mafia":
-        teammates = [p for p, d in state["players"].items() if d.get("role") == "Mafia"]
-        st.warning(f"💀 **MAFIA TEAM:** {', '.join(teammates)}")
-    elif user_role == "Citizen":
-        st.info("🕵️ **CITIZEN:** Try to figure out who the Mafia is!")
 
     st.divider()
 
