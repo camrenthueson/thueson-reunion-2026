@@ -278,6 +278,7 @@ def display_admin(state):
         state["disabled_types"] = disabled
         save_state(state)
         st.toast("Rules Updated!")
+        time.sleep(2.5)
         st.rerun()
     
     # --- 1. WIN CHECK CALCULATION ---
