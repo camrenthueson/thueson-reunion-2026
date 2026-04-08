@@ -668,55 +668,56 @@ def display_mafia():
     if current_phase == "Night":
         st.subheader("🌙 Night Phase")
 
-        # --- MAFIA ACTION ---
-        if user_role == "Mafia":
-            targets = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Mafia"]
-            vote = st.selectbox("Choose a target to eliminate:", ["None"] + targets)
-            if st.button("Confirm Kill Vote"):
-                player_data["mafia_vote"] = vote
-                save_state(state);
-                st.success(f"Voted for {vote}")
-
-        #---Doctor ACTION---
-        elif user_role == "Doctor":
-            current_save = player_data.get("mafia_vote")
-            if current_save and current_save != "None":
-                st.success(f"🏥 You are currently protecting **{current_save}**.")
-
-            targets = [p for p, d in state["players"].items() if d.get("is_alive")]
-            save_choice = st.selectbox("Choose (or change) who to protect:", ["None"] + targets)
-            if st.button("Lock In Protection"):
-                player_data["mafia_vote"] = save_choice
-                save_state(state)
-                st.success(f"Protection updated!")
-                st.rerun()
-
-        # --- DETECTIVE ACTION (NIGHT) ---
-        elif user_role == "Detective":
-            # 1. Check if they have a target selected
-            current_target = player_data.get("mafia_vote")
-
-            if current_target and current_target != "None":
-                st.info(f"🔍 You are currently set to investigate **{current_target}**.")
-            else:
-                st.write("🔍 You haven't chosen a target to tail yet.")
-
-            # 2. Keep the menu open so they can change their mind
-            targets = [p for p, d in state["players"].items() if d.get("is_alive") and p != user]
-            investigate = st.selectbox("Choose (or change) your investigation target:", ["None"] + targets)
-
-            if st.button("Lock In Investigation"):
-                if investigate != "None":
-                    player_data["mafia_vote"] = investigate
-                    # We update 'last_checked' now, but the Day Phase logic
-                    # won't show the report until state["mafia_phase"] == "Day"
-                    player_data["last_checked"] = investigate
+        with st.expander("Action Portal"):
+            # --- MAFIA ACTION ---
+            if user_role == "Mafia":
+                targets = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Mafia"]
+                vote = st.selectbox("Choose a target to eliminate:", ["None"] + targets)
+                if st.button("Confirm Kill Vote"):
+                    player_data["mafia_vote"] = vote
+                    save_state(state);
+                    st.success(f"Voted for {vote}")
+    
+            #---Doctor ACTION---
+            elif user_role == "Doctor":
+                current_save = player_data.get("mafia_vote")
+                if current_save and current_save != "None":
+                    st.success(f"🏥 You are currently protecting **{current_save}**.")
+    
+                targets = [p for p, d in state["players"].items() if d.get("is_alive")]
+                save_choice = st.selectbox("Choose (or change) who to protect:", ["None"] + targets)
+                if st.button("Lock In Protection"):
+                    player_data["mafia_vote"] = save_choice
                     save_state(state)
-                    st.success(f"Target updated to {investigate}!")
+                    st.success(f"Protection updated!")
                     st.rerun()
-
-        else:
-            st.write("The town is asleep. Stay quiet...")
+    
+            # --- DETECTIVE ACTION (NIGHT) ---
+            elif user_role == "Detective":
+                # 1. Check if they have a target selected
+                current_target = player_data.get("mafia_vote")
+    
+                if current_target and current_target != "None":
+                    st.info(f"🔍 You are currently set to investigate **{current_target}**.")
+                else:
+                    st.write("🔍 You haven't chosen a target to tail yet.")
+    
+                # 2. Keep the menu open so they can change their mind
+                targets = [p for p, d in state["players"].items() if d.get("is_alive") and p != user]
+                investigate = st.selectbox("Choose (or change) your investigation target:", ["None"] + targets)
+    
+                if st.button("Lock In Investigation"):
+                    if investigate != "None":
+                        player_data["mafia_vote"] = investigate
+                        # We update 'last_checked' now, but the Day Phase logic
+                        # won't show the report until state["mafia_phase"] == "Day"
+                        player_data["last_checked"] = investigate
+                        save_state(state)
+                        st.success(f"Target updated to {investigate}!")
+                        st.rerun()
+    
+            else:
+                st.write("The town is asleep. Stay quiet...")
 
     # 4. DAY PHASE (Town Square)
     else:
