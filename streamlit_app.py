@@ -183,7 +183,12 @@ def display_dashboard():
                 st.caption(f"Stakes: +{win_val} / {fail_val} | Pass: {pass_cost}⭐")
                 
                 # --- ADD THIS: The 'Victim' input for the Audit Log ---
-                victim = st.selectbox("Who was the victim?", ["Select Name"] + [p for p in state["players"] if p != user], key=f"victim_{slot_key}")
+                victim = st.selectbox(
+                    "Who was the victim?", 
+                    ["Select Name"] + [p for p in state["players"] if p != user], 
+                    key=f"victim_{slot_key}",
+                    help="Select the person you successfully tricked! (Note: You don't need to select a victim if you are clicking 'Failure')"
+                )
                 
                 c1, c2, c3 = st.columns(3)
             
