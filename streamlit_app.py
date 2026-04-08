@@ -262,12 +262,15 @@ def display_admin(state):
     # --- MISSION CATEGORY CONTROL ---
     st.subheader("Mission Management")
     all_types = ["slip_it_in", "convince_me", "trivia"]
+
+    # Use .get() to prevent crashes if the key doesn't exist yet
+    current_disabled = state.get("disabled_types", [])
     
     # We use multiselect to choose which ones to DISABLE
     disabled = st.multiselect(
         "Disable Mission Categories:",
         options=all_types,
-        default=state.get("disabled_types", []),
+        default=current_disabled,
         help="Missions in these categories will not appear for players."
     )
 
