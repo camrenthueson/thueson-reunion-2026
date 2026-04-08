@@ -16,7 +16,8 @@ def save_state(state):
 
 def calculate_mission_value(base_val, passes, is_failure=False):
     """The 'Hot Potato' Compound Math"""
-    multiplier = 1.5 ** passes
+    safe_passes = min(passes, 5)
+    multiplier = 1.5 ** safe_passes
     val = base_val * multiplier
     if is_failure:
         # Failure is 50% of the current Success value, but negative
