@@ -24,26 +24,58 @@
   "trivia": [
     {
       "id": "t1",
-      "question": "In what year was the Teton Dam flood that affected Rexburg?",
-      "options": ["1972", "1976", "1980", "1968"],
-      "answer": "1976",
-      "points": 25,
-      "stars": 1
+      "question": "Place Holder",
+      "options": ["A", "B", "C", "D"],
+      "answer": "A",
+      "points": 10,
+      "stars": 0
     },
     {
       "id": "t2",
-      "question": "Which family member is most likely to be 'The Mafia' in real life?",
-      "options": ["Aunt Jen", "Cousin Kyle", "Grandpa", "Uncle Mike"],
-      "answer": "Aunt Jen",
+      "question": "Place Holder1.1",
+      "options": ["A", "B", "C", "D"],
+      "answer": "B",
       "points": 10,
       "stars": 0
     },
     {
       "id": "t3",
-      "question": "In what year was the first Thueson Reunion held?",
-      "options": ["1985", "1992", "2001", "1978"],
-      "answer": "1992",
-      "points": 30,
+      "question": "Place Holder0",
+      "options": ["A", "B", "C", "D"],
+      "answer": "A",
+      "points": 10,
+      "stars": 0
+    },
+    {
+      "id": "t4",
+      "question": "Place Holder1",
+      "options": ["A", "B", "C", "D"],
+      "answer": "A",
+      "points": 10,
+      "stars": 0
+    },
+    {
+      "id": "t5",
+      "question": "Place Holder2",
+      "options": ["A", "B", "C", "D"],
+      "answer": "B",
+      "points": 10,
+      "stars": 0
+    },
+    {
+      "id": "t6",
+      "question": "Place Holder3",
+      "options": ["A", "B", "C", "D"],
+      "answer": "C",
+      "points": 10,
+      "stars": 0
+    },
+    {
+      "id": "t7",
+      "question": "Place Holder4",
+      "options": ["A", "B", "C", "D"],
+      "answer": "D",
+      "points": 10,
       "stars": 0
     }
   ]
