@@ -98,31 +98,30 @@ def display_dashboard():
 
     st.header(f"Dashboard: {user}")
 
-    # --- LEADERBOARD SECTION ---
-    st.subheader("🏆 Current Standings")
-    
-    # Convert dictionary to a list of tuples and sort by points descending
-    leaderboard_data = []
-    for p_name, p_info in state["players"].items():
-        # We only show active competitors, or everyone if you prefer
-        if not p_info.get("is_admin") and not p_info.get("is_judge"):
-            leaderboard_data.append({
-                "Rank": 0, # Placeholder
-                "Player": p_name,
-                "Points": p_info["points"],
-            })
-    
-    # Sort by Points
-    leaderboard_data = sorted(leaderboard_data, key=lambda x: x["Points"], reverse=True)
-    
-    # Assign Ranks (1st, 2nd, etc.)
-    for i, entry in enumerate(leaderboard_data):
-        entry["Rank"] = i + 1
+    # --- COLLAPSIBLE LEADERBOARD ---
+    with st.expander("📊 View Leaderboard & Standings"):
+        leaderboard_data = []
+        for p_name, p_info in state["players"].items():
+            # Filter out Admin/Judge
+            if not p_info.get("is_admin") and not p_info.get("is_judge"):
+                leaderboard_data.append({
+                    "Rank": 0, 
+                    "Player": p_name,
+                    "Points": p_info["points"]
+                })
+        
+        # Sort by Points descending
+        leaderboard_data = sorted(leaderboard_data, key=lambda x: x["Points"], reverse=True)
+        
+        # Assign Ranks
+        for i, entry in enumerate(leaderboard_data):
+            entry["Rank"] = i + 1
 
-    # Display as a pretty table
-    st.table(leaderboard_data)
-    st.divider()
-    
+        # Display as a table inside the expander
+        # Using use_container_width=True makes it look better on mobile phones!
+        st.table(leaderboard_data)
+
+    #---User points and stars---
     c_m1, c_m2 = st.columns(2)
     c_m1.metric("Points", player_data["points"])
     c_m2.metric("Stars", player_data["stars"])
