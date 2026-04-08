@@ -513,9 +513,8 @@ def display_admin():
 
                         # Log it for the game history
                         state["mafia_log"].insert(0,
-                                                  f"🎭 ROLE SHIFT: {target_to_kill} ({old_role}) left. {new_heir} is the new {old_role}!")
-                        state["audit_log"].insert(0,
-                                                  f"⚖️ ADMIN reassigned {old_role} from {target_to_kill} to {new_heir}.")
+                                                  f"🎭 ROLE SHIFT: {target_to_kill} ({old_role}) left. Someone else is the new {old_role}!")
+                        
                     else:
                         state["mafia_log"].insert(0,
                                                   f"⚠️ ROLE LOST: {target_to_kill} was the {old_role}, but no citizens were left.")
