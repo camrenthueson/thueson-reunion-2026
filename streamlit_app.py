@@ -175,13 +175,15 @@ def display_dashboard():
                             player_data["points"] += win_val
                             player_data["completed_ids"].append(m_data["id"])
                             state["audit_log"].insert(0, f"🧠 {user} answered Trivia correctly (+{win_val})")
-                            st.success("Correct!")
-                            time.sleep(1.0)
+                            st.success(f"Correct!+{win_val} points")
+                            time.sleep(2.0)
                         else:
-                            # FAILURE: No points, but NOT added to completed_ids (will return later)
-                            st.error("Wrong!")
-                            time.sleep(1.0)
+                            penalty = int(win_val / 2) 
+                            player_data["points"] -= penalty
                             state["audit_log"].insert(0, f"❌ {user} missed a Trivia question.")
+                            st.error(f"Wrong! You lost {penalty} points. Don't worry, you'll get another chance.")
+                            time.sleep(3.0)
+                            
 
                         # Either way, clear the slot and save
                         slot_info["id"], slot_info["passes"] = None, 0
