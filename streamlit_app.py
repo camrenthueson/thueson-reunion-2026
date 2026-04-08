@@ -218,6 +218,7 @@ def display_dashboard():
                     potential_targets = [
                         p for p, info in state["players"].items() 
                         if p != user and not info.get("is_admin") and not info.get("is_judge")
+                    ]
                     target = st.selectbox(
                         "Pass To", 
                         ["Select"] + potential_targets,
