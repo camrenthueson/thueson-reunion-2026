@@ -146,7 +146,7 @@ def display_dashboard():
                             st.success("Correct!")
                         else:
                             # FAILURE: No points, but NOT added to completed_ids (will return later)
-                            st.error(f"Wrong! The answer was {correct_ans}")
+                            st.error("Wrong!")
                             state["audit_log"].insert(0, f"❌ {user} missed a Trivia question.")
 
                         # Either way, clear the slot and save
