@@ -97,6 +97,33 @@ def display_dashboard():
             st.rerun()
 
     st.header(f"Dashboard: {user}")
+
+    # --- LEADERBOARD SECTION ---
+    st.subheader("🏆 Current Standings")
+    
+    # Convert dictionary to a list of tuples and sort by points descending
+    leaderboard_data = []
+    for p_name, p_info in state["players"].items():
+        # We only show active competitors, or everyone if you prefer
+        if not p_info.get("is_admin") and not p_info.get("is_judge"):
+            leaderboard_data.append({
+                "Rank": 0, # Placeholder
+                "Player": p_name,
+                "Points": p_info["points"],
+                "Stars": p_info["stars"]
+            })
+    
+    # Sort by Points
+    leaderboard_data = sorted(leaderboard_data, key=lambda x: x["Points"], reverse=True)
+    
+    # Assign Ranks (1st, 2nd, etc.)
+    for i, entry in enumerate(leaderboard_data):
+        entry["Rank"] = i + 1
+
+    # Display as a pretty table
+    st.table(leaderboard_data)
+    st.divider()
+    
     c_m1, c_m2 = st.columns(2)
     c_m1.metric("Points", player_data["points"])
     c_m2.metric("Stars", player_data["stars"])
