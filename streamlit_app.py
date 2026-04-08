@@ -277,7 +277,7 @@ def display_admin(state):
     if st.button("Update Global Mission Rules"):
         state["disabled_types"] = disabled
         save_state(state)
-        st.toast(f"✅ Rules Updated!")
+        st.toast("Rules Updated!")
         st.rerun()
     
     # --- 1. WIN CHECK CALCULATION ---
