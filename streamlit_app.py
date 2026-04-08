@@ -110,7 +110,6 @@ def display_dashboard():
                 "Rank": 0, # Placeholder
                 "Player": p_name,
                 "Points": p_info["points"],
-                "Stars": p_info["stars"]
             })
     
     # Sort by Points
