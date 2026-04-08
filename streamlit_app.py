@@ -624,7 +624,9 @@ def display_mafia():
         return
 
     # --- 4. LIVE GAME UI (Only reached if active AND alive) ---
-    st.title(f"Your Secret Role: {user_role}")
+    with st.expander("🔒 Tap to Reveal Your Secret Identity"):
+        st.caption(f"Your Secret Role: {user_role}")
+    
     current_phase = state.get("mafia_phase", "Day")
 
     # --- NEW: INSTRUCTIONS EXPANDER ---
@@ -656,7 +658,7 @@ def display_mafia():
     # 2. TEAM INTEL
     if user_role == "Mafia":
         teammates = [p for p, d in state["players"].items() if d.get("role") == "Mafia"]
-        st.warning(f"🚨 **MAFIA TEAM:** {', '.join(teammates)}")
+        st.warning(f"💀 **MAFIA TEAM:** {', '.join(teammates)}")
     elif user_role == "Citizen":
         st.info("🕵️ **CITIZEN:** Try to figure out who the Mafia is!")
 
