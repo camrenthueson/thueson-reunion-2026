@@ -1,0 +1,50 @@
+{
+  "slip_it_in": [
+    {"id": "s1", "text": "Mention that you're thinking about starting a 'competitive llama grooming' business.", "stars": 1, "points": 20},
+    {"id": "s2", "text": "Use the phrase 'That's a real Rexburg miracle' when something minor goes right.", "stars": 0, "points": 20},
+    {"id": "s3", "text": "I think the neighbor is a Russian spy.", "stars": 0, "points": 20},
+    {"id": "s4", "text": "Does this potato salad taste like copper to you?", "stars": 0, "points": 20},
+    {"id": "s5", "text": "I've decided to start a llama farm in Provo.", "stars": 0, "points": 20},
+    {"id": "s6", "text": "Have you ever noticed how much Uncle Jim looks like a hawk?", "stars": 0, "points": 20},
+    {"id": "s7", "text": "I’m pretty sure I saw a Bigfoot near the Weber River.", "stars": 0, "points": 20},
+    {"id": "s8", "text": "Is it just me, or is the gravity stronger in this room?", "stars": 0, "points": 20},
+    {"id": "s9", "text": "I only eat foods that are shaped like circles today.", "stars": 0, "points": 20},
+    {"id": "s10", "text": "I think I'm becoming allergic to the color blue.", "stars": 0, "points": 20}
+  ],
+  "convince_me": [
+    {"id": "c1", "text": "Convince someone that Idaho is actually the only state that doesn't exist on European maps.", "stars": 2, "points": 20},
+    {"id": "c2", "text": "Get someone to agree to a pinky-swear that they will only walk backward for the next 2 minutes.", "stars": 1, "points": 20},
+    {"id": "c3", "text": "number 3", "stars": 2, "points": 20},
+    {"id": "c4", "text": "number 4", "stars": 1, "points": 20},
+    {"id": "c5", "text": "number 5", "stars": 2, "points": 20},
+    {"id": "c6", "text": "number 6", "stars": 1, "points": 20},
+    {"id": "c7", "text": "number 7", "stars": 2, "points": 20},
+    {"id": "c8", "text": "number 8", "stars": 1, "points": 20}
+  ],
+  "trivia": [
+    {
+      "id": "t1",
+      "question": "In what year was the Teton Dam flood that affected Rexburg?",
+      "options": ["1972", "1976", "1980", "1968"],
+      "answer": "1976",
+      "points": 25,
+      "stars": 1
+    },
+    {
+      "id": "t2",
+      "question": "Which family member is most likely to be 'The Mafia' in real life?",
+      "options": ["Aunt Jen", "Cousin Kyle", "Grandpa", "Uncle Mike"],
+      "answer": "Aunt Jen",
+      "points": 10,
+      "stars": 0
+    },
+    {
+      "id": "t3",
+      "question": "In what year was the first Thueson Reunion held?",
+      "options": ["1985", "1992", "2001", "1978"],
+      "answer": "1992",
+      "points": 30,
+      "stars": 0
+    }
+  ]
+}

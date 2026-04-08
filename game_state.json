@@ -1,0 +1,14 @@
+{
+    "players": {},
+    "used_ids": [],
+    "audit_log": [
+        "\ud83d\ude80 System Reinitialized"
+    ],
+    "mafia_active": false,
+    "mafia_phase": "Night",
+    "mafia_log": [],
+    "winner_declared": false,
+    "global_event": {
+        "broadcast_message": ""
+    }
+}
