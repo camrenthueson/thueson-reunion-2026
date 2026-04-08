@@ -82,7 +82,7 @@ def display_dashboard():
         # Optional: Show the Global Broadcast here too so Staff can see what they sent
         global_ev = state.get("global_event", {})
         if global_ev.get("broadcast_message"):
-            st.warning(f"🚨 **CURRENT BROADCAST:** {global_ev['broadcast_message']}")
+            st.warning(f"🚨 **ANNOUNCEMENT:** {global_ev['broadcast_message']}")
 
         return  # STOP HERE for Staff. Don't run the mission code below.
 
@@ -117,7 +117,6 @@ def display_dashboard():
         for i, entry in enumerate(leaderboard_data):
             entry["Rank"] = i + 1
 
-        # Display as a table inside the expander
         # Using use_container_width=True makes it look better on mobile phones!
         st.table(leaderboard_data)
 
@@ -182,22 +181,34 @@ def display_dashboard():
             # --- 2. STANDARD UI FOR MISSIONS (Slip It In / Convince Me) ---
             else:
                 st.caption(f"Stakes: +{win_val} / {fail_val} | Pass: {pass_cost}⭐")
+                
+                # --- ADD THIS: The 'Victim' input for the Audit Log ---
+                victim = st.selectbox("Who was the victim?", ["Select Name"] + [p for p in state["players"] if p != user], key=f"victim_{slot_key}")
+                
                 c1, c2, c3 = st.columns(3)
-
+            
                 if c1.button("Success ✅", key=f"win_{slot_key}"):
-                    player_data["points"] += win_val
-                    player_data["stars"] += m_data.get("stars", 0)
-                    # Add to completed so they don't see it again
-                    player_data["completed_ids"].append(m_data["id"])
-                    state["audit_log"].insert(0, f"✅ {user} won {win_val} pts!")
-                    slot_info["id"], slot_info["passes"] = None, 0
-                    save_state(state)
-                    st.rerun()
-
+                    # Check if they actually selected someone
+                    if victim == "Select Name":
+                        st.error("You must select a victim to claim success!")
+                    else:
+                        player_data["points"] += win_val
+                        player_data["stars"] += m_data.get("stars", 0)
+                        player_data["completed_ids"].append(m_data["id"])
+                        
+                        # --- MODIFIED LOG: Include the target and the specific task ---
+                        mission_text = m_data.get("text") or m_data.get("question")
+                        log_entry = f"🎯 {user} got {victim}! Task: '{mission_text}' (+{win_val} pts)"
+                        state["audit_log"].insert(0, log_entry)
+                        
+                        slot_info["id"], slot_info["passes"] = None, 0
+                        save_state(state)
+                        st.rerun()
+            
                 if c2.button("Failure ❌", key=f"fail_{slot_key}"):
+                    # Failure doesn't usually need a victim, so we leave it simple
                     player_data["points"] += fail_val
-                    # NOT adding to completed_ids here means they can retry this mission later
-                    state["audit_log"].insert(0, f"❌ {user} lost {abs(fail_val)} pts.")
+                    state["audit_log"].insert(0, f"❌ {user} failed their mission and lost {abs(fail_val)} pts.")
                     slot_info["id"], slot_info["passes"] = None, 0
                     save_state(state)
                     st.rerun()
