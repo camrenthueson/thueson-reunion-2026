@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import json
+import time
 from data_manager import load_state, save_state, calculate_mission_value
 
 # --- 1. INITIALIZATION ---
@@ -278,7 +279,7 @@ def display_admin(state):
         state["disabled_types"] = disabled
         save_state(state)
         st.toast("Rules Updated!")
-        time.sleep(2.5)
+        time.sleep(1.0)
         st.rerun()
     
     # --- 1. WIN CHECK CALCULATION ---
