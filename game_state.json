@@ -1,5 +1,6 @@
 {
     "players": {},
+    "disabled_types":[],
     "used_ids": [],
     "audit_log": [
         "\ud83d\ude80 System Reinitialized"
