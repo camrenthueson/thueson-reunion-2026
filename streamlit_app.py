@@ -88,13 +88,12 @@ def display_dashboard():
 
     missions = st.session_state["missions_library"]
 
+    #---Global announcement---
     global_ev = state.get("global_event", {})
-    if global_ev.get("broadcast_message"):
-        st.warning(f"🚨 **ANNOUNCEMENT:** {global_ev['broadcast_message']}")
-        if player_data.get("is_admin") and st.button("Clear Alert"):
-            state["global_event"]["broadcast_message"] = ""
-            save_state(state)
-            st.rerun()
+    broadcast = global_ev.get("broadcast_message")
+    
+    if broadcast:
+        st.warning(f"🚨 **ANNOUNCEMENT:** {broadcast}")
 
     st.header(f"Dashboard: {user}")
 
@@ -118,18 +117,27 @@ def display_dashboard():
             entry["Rank"] = i + 1
 
         # Using use_container_width=True makes it look better on mobile phones!
-        st.table(leaderboard_data)
+        st.dataframe(leaderboard_data, use_container_width=True, hide_index=True)
 
     #---User points and stars---
     c_m1, c_m2 = st.columns(2)
     c_m1.metric("Points", player_data["points"])
     c_m2.metric("Stars", player_data["stars"])
 
-    for slot_key, slot_info in player_data["active_slots"].items():
-        if slot_info["id"] is None:
-            # --- THE FIX: Filter based on the PLAYER'S history, not the global state ---
-            user_completed = player_data.get("completed_ids", [])
+    st.subheader("Your Active Missions")
+    
+    # Get the global list of what is turned off
+    disabled_types = state.get("disabled_types", [])
 
+    for slot_key, slot_info in player_data["active_slots"].items():
+        # --- 1. GLOBAL DISABLE CHECK ---
+        if slot_info["type"] in disabled_types:
+            st.warning(f"⚠️ {slot_info['type'].replace('_', ' ').title()} is currently disabled by Admin.")
+            continue # Skip this slot and move to the next one
+
+        # --- 2. ASSIGN NEW MISSION IF EMPTY ---
+        if slot_info["id"] is None:
+            user_completed = player_data.get("completed_ids", [])
             available = [
                 m for m in missions[slot_info["type"]]
                 if m["id"] not in user_completed
@@ -138,7 +146,6 @@ def display_dashboard():
             if available:
                 new_m = random.choice(available)
                 slot_info["id"] = new_m["id"]
-                # We NO LONGER add to state["used_ids"] here
                 save_state(state)
                 st.rerun()
 
@@ -248,11 +255,28 @@ def display_dashboard():
 
 
 # --- 4. ADMIN CONTROL PANEL FUNCTION ---
-def display_admin():
+def display_admin(state):
     st.title("🕹️ Admin Control Panel")
-    state = load_state()
     user = st.session_state["user"]
+    
+    # --- MISSION CATEGORY CONTROL ---
+    st.subheader("Mission Management")
+    all_types = ["slip_it_in", "convince_me", "trivia"]
+    
+    # We use multiselect to choose which ones to DISABLE
+    disabled = st.multiselect(
+        "Disable Mission Categories:",
+        options=all_types,
+        default=state.get("disabled_types", []),
+        help="Missions in these categories will not appear for players."
+    )
 
+    if st.button("Update Global Mission Rules"):
+        state["disabled_types"] = disabled
+        save_state(state)
+        st.success(f"Updated! Disabled: {', '.join(disabled) if disabled else 'None'}")
+        st.rerun()
+    
     # --- 1. WIN CHECK CALCULATION ---
     alive_players = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Observer"]
     mafia_alive = [p for p in alive_players if state["players"][p].get("role") == "Mafia"]
@@ -342,13 +366,25 @@ def display_admin():
 
     # --- 2. GLOBAL ANNOUNCEMENTS ---
     st.subheader("📣 Global Broadcast")
+    
+    # Show the current message so you know what's live
+    current_msg = state.get("global_event", {}).get("broadcast_message", "")
+    if current_msg:
+        st.info(f"Currently Live: {current_msg}")
+        if st.button("🗑️ Clear Current Alert"):
+            state["global_event"]["broadcast_message"] = ""
+            save_state(state)
+            st.rerun()
+
     msg = st.text_input("Type a challenge for everyone:", key="admin_msg")
     if st.button("Send Alert"):
-        if "global_event" not in state: state["global_event"] = {}
-        state["global_event"]["broadcast_message"] = msg
-        state["audit_log"].insert(0, f"📢 ADMIN: {msg}")
-        save_state(state)
-        st.success("Broadcast sent!")
+        if msg: # Only send if there is actually text
+            if "global_event" not in state: state["global_event"] = {}
+            state["global_event"]["broadcast_message"] = msg
+            state["audit_log"].insert(0, f"📢 ADMIN: {msg}")
+            save_state(state)
+            st.success("Broadcast sent!")
+            st.rerun() # Refresh to show the info box above
 
     st.divider()
 
