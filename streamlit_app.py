@@ -703,17 +703,17 @@ def display_mafia():
             
             ### Game Phases
             * **🌅 Day:** All players have the option to vote during the day on who they'd like to kill. Player with the most votes cast against them will die when night falls.
-            * **🌙 Night:** This is when Mofia members, the Detective, and Doctor are tasked with selecting players. Mafia will also vote during the night on who they'd like to take out. This must be unanimously decided before night ends.
+            * **🌙 Night:** This is when Mafia members, the Detective, and Doctor are tasked with selecting players. Mafia will also vote during the night on who they'd like to take out. This must be unanimously decided before night ends.
             * The duration of each phase will vary, and players will typically be given a warning before a phase switch. But also maybe not....
                         
             ### 🎭 Role Abilities
-            * **💀 Mofia:** Members collectively choose one person to kill each night. 
+            * **💀 Mafia:** Members collectively choose one person to kill each night. 
             * **🕵️ Detective:** Each Night, choose one person to investigate. You will see their true role the next Morning. 
             * **🏥 Doctor:** Each Night, choose one person to protect. If the Mafia targets them, they will survive.
             * **🚀 Swing Vote:** During the Day, any player can spend **3 Stars** to make their vote count as **2**!
 
             ### Optional Rule
-            * **Hard Core Mode:** For a member of the mofia to officially kill a citizen they must physically touch their victim during the night phase before they vote. (regulated through the good ol honor system)
+            * **Hard Core Mode:** For a member of the mafia to officially kill a citizen they must physically touch their victim during the night phase before they vote. (regulated through the good ol honor system)
 
             ### ⚖️ Rewards
             * **Winning Team (Alive):** +40 pts / +3 ⭐
