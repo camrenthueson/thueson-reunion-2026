@@ -165,6 +165,7 @@ def display_dashboard():
             if slot_info["type"] == "trivia":
                 options = m_data.get("options", [])
                 correct_ans = m_data.get("answer")
+                star_reward = m_data.get("stars", 0)
 
                 # Display options as buttons
                 cols = st.columns(len(options))
@@ -173,9 +174,10 @@ def display_dashboard():
                         if opt == correct_ans:
                             # SUCCESS: Award points and record completion
                             player_data["points"] += win_val
+                            player_data["stars"] += star_reward
                             player_data["completed_ids"].append(m_data["id"])
                             state["audit_log"].insert(0, f"🧠 {user} answered Trivia correctly (+{win_val})")
-                            st.success(f"Correct!+{win_val} points")
+                            st.success(f"Correct!+{win_val} points and +{star_reward} stars!")
                             time.sleep(2.0)
                         else:
                             penalty = int(win_val / 2) 
