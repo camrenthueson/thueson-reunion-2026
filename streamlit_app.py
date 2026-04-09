@@ -12,7 +12,7 @@ if "missions_library" not in st.session_state:
 
 # --- 2. LOGIN SCREEN FUNCTION ---
 def login_screen():
-    st.title("🌲 Thueson Reunion: 2026")
+    st.title("SideQuest")
     state = load_state()
     player_list = sorted(list(state["players"].keys()))
 
