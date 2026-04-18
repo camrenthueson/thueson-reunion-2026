@@ -655,26 +655,26 @@ def display_admin(state):
     with tab_broadcast:
         # Move the "Global Broadcast" text input and buttons here.
         # --- 2. GLOBAL ANNOUNCEMENTS ---
-    st.subheader("📣 Global Broadcast")
+        st.subheader("📣 Global Broadcast")
+        
+        # Show the current message so you know what's live
+        current_msg = state.get("global_event", {}).get("broadcast_message", "")
+        if current_msg:
+            st.info(f"Currently Live: {current_msg}")
+            if st.button("🗑️ Clear Current Alert"):
+                state["global_event"]["broadcast_message"] = ""
+                save_state(state)
+                st.rerun()
     
-    # Show the current message so you know what's live
-    current_msg = state.get("global_event", {}).get("broadcast_message", "")
-    if current_msg:
-        st.info(f"Currently Live: {current_msg}")
-        if st.button("🗑️ Clear Current Alert"):
-            state["global_event"]["broadcast_message"] = ""
-            save_state(state)
-            st.rerun()
-
-    msg = st.text_input("Type a challenge for everyone:", key="admin_msg")
-    if st.button("Send Alert"):
-        if msg: # Only send if there is actually text
-            if "global_event" not in state: state["global_event"] = {}
-            state["global_event"]["broadcast_message"] = msg
-            state["audit_log"].insert(0, f"📢 ADMIN: {msg}")
-            save_state(state)
-            st.success("Broadcast sent!")
-            st.rerun() # Refresh to show the info box above
+        msg = st.text_input("Type a challenge for everyone:", key="admin_msg")
+        if st.button("Send Alert"):
+            if msg: # Only send if there is actually text
+                if "global_event" not in state: state["global_event"] = {}
+                state["global_event"]["broadcast_message"] = msg
+                state["audit_log"].insert(0, f"📢 ADMIN: {msg}")
+                save_state(state)
+                st.success("Broadcast sent!")
+                st.rerun() # Refresh to show the info box above
         pass
 
 #----------------------------------------------------------------Judge Tools----------------------------------------------------------
