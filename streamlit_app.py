@@ -360,7 +360,8 @@ def display_admin(state):
 
     
     # Create the Tabs
-    tab_mafia, tab_sos, tab_broadcast, tab_judge, tab_sys = st.tabs([
+    tab_dashboard, tab_mafia, tab_sos, tab_broadcast, tab_judge, tab_sys = st.tabs([
+        "Dashboard",
         "🕵️ Mafia", 
         "🎲 Split or Steal", 
         "📣 Broadcast", 
@@ -368,28 +369,28 @@ def display_admin(state):
         "🛠️ Maintenance"
     ])
 
-
- # --- MISSION CATEGORY CONTROL ---
-    st.subheader("Mission Management")
-    all_types = ["slip_it_in", "convince_me", "trivia"]
-
-    # Use .get() to prevent crashes if the key doesn't exist yet
-    current_disabled = state.get("disabled_types", [])
+    with tab_dashboard:
+     # --- MISSION CATEGORY CONTROL ---
+        st.subheader("Mission Management")
+        all_types = ["slip_it_in", "convince_me", "trivia"]
     
-    # We use multiselect to choose which ones to DISABLE
-    disabled = st.multiselect(
-        "Disable Mission Categories:",
-        options=all_types,
-        default=current_disabled,
-        help="Missions in these categories will not appear for players."
-    )
-
-    if st.button("Update Global Mission Rules"):
-        state["disabled_types"] = disabled
-        save_state(state)
-        st.toast("Rules Updated!", icon="✅")
-        time.sleep(1.0)
-        st.rerun()
+        # Use .get() to prevent crashes if the key doesn't exist yet
+        current_disabled = state.get("disabled_types", [])
+        
+        # We use multiselect to choose which ones to DISABLE
+        disabled = st.multiselect(
+            "Disable Mission Categories:",
+            options=all_types,
+            default=current_disabled,
+            help="Missions in these categories will not appear for players."
+        )
+    
+        if st.button("Update Global Mission Rules"):
+            state["disabled_types"] = disabled
+            save_state(state)
+            st.toast("Rules Updated!", icon="✅")
+            time.sleep(1.0)
+            st.rerun()
     #-------------------------------------------------------------Mafia------------------------------------------------------------------------
     with tab_mafia:
         # Move your existing Win Check, Victory Overlay, 
