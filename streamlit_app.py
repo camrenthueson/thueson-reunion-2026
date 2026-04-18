@@ -353,120 +353,308 @@ def display_sos_game(state, user):
         st.rerun()
 
 # --- 4. ADMIN CONTROL PANEL FUNCTION ---
+
 def display_admin(state):
     st.title("🕹️ Admin Control Panel")
     user = st.session_state["user"]
+
     
-    # --- MISSION CATEGORY CONTROL ---
-    st.subheader("Mission Management")
-    all_types = ["slip_it_in", "convince_me", "trivia"]
+    # Create the Tabs
+    tab_mafia, tab_sos, tab_broadcast, tab_judge, tab_sys = st.tabs([
+        "🕵️ Mafia", 
+        "🎲 Split or Steal", 
+        "📣 Broadcast", 
+        "⚖️ Judge Tools", 
+        "🛠️ Maintenance"
+    ])
 
-    # Use .get() to prevent crashes if the key doesn't exist yet
-    current_disabled = state.get("disabled_types", [])
+
+     # --- MISSION CATEGORY CONTROL ---
+        st.subheader("Mission Management")
+        all_types = ["slip_it_in", "convince_me", "trivia"]
     
-    # We use multiselect to choose which ones to DISABLE
-    disabled = st.multiselect(
-        "Disable Mission Categories:",
-        options=all_types,
-        default=current_disabled,
-        help="Missions in these categories will not appear for players."
-    )
-
-    if st.button("Update Global Mission Rules"):
-        state["disabled_types"] = disabled
-        save_state(state)
-        st.toast("Rules Updated!", icon="✅")
-        time.sleep(1.0)
-        st.rerun()
+        # Use .get() to prevent crashes if the key doesn't exist yet
+        current_disabled = state.get("disabled_types", [])
+        
+        # We use multiselect to choose which ones to DISABLE
+        disabled = st.multiselect(
+            "Disable Mission Categories:",
+            options=all_types,
+            default=current_disabled,
+            help="Missions in these categories will not appear for players."
+        )
     
-    # --- 1. WIN CHECK CALCULATION ---
-    alive_players = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Observer"]
-    mafia_alive = [p for p in alive_players if state["players"][p].get("role") == "Mafia"]
-    citizens_alive = [p for p in alive_players if state["players"][p].get("role") in ["Citizen", "Doctor", "Detective"]]
-
-    # Logic to flip the switch to "Winner Declared"
-    if state.get("mafia_active") and not state.get("winner_declared"):
-        winner_team = None
-
-        if not mafia_alive and len(alive_players) > 0:
-            winner_team = "Citizens"
-        elif len(mafia_alive) >= len(citizens_alive) and len(alive_players) > 0:
-            winner_team = "Mafia"
-
-        if winner_team:
-            state["winner_declared"] = True
-
-            # --- 🏆 DISTRIBUTE REWARDS ---
-            for p, d in state["players"].items():
-                role = d.get("role")
-                if role == "Observer": continue
-
-                # Check if player is on the winning team
-                is_winner = (winner_team == "Mafia" and role == "Mafia") or \
-                            (winner_team == "Citizens" and role in ["Citizen", "Doctor", "Detective"])
-
-                if is_winner:
-                    if d.get("is_alive"):
-                        d["points"] += 40
-                        d["stars"] += 3
-                        state["audit_log"].insert(0, f"🏆 {p} earned 40pts/3⭐ for a Living Win!")
-                    else:
-                        d["points"] += 10
-                        d["stars"] += 1
-                        state["audit_log"].insert(0, f"🎗️ {p} earned 10pts/1⭐ for a Ghost Win!")
-
+        if st.button("Update Global Mission Rules"):
+            state["disabled_types"] = disabled
             save_state(state)
+            st.toast("Rules Updated!", icon="✅")
+            time.sleep(1.0)
             st.rerun()
-
-    # --- 2. VICTORY OVERLAY & RESET ---
-    if state.get("winner_declared"):
-        if not mafia_alive:
-            st.balloons()
-            st.success("🏆 VICTORY: Citizens Won!")
+    #-------------------------------------------------------------Mafia------------------------------------------------------------------------
+    with tab_mafia:
+        # Move your existing Win Check, Victory Overlay, 
+        # God View, and Mafia Management code here.
+               
+        # --- 1. WIN CHECK CALCULATION ---
+        alive_players = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Observer"]
+        mafia_alive = [p for p in alive_players if state["players"][p].get("role") == "Mafia"]
+        citizens_alive = [p for p in alive_players if state["players"][p].get("role") in ["Citizen", "Doctor", "Detective"]]
+    
+        # Logic to flip the switch to "Winner Declared"
+        if state.get("mafia_active") and not state.get("winner_declared"):
+            winner_team = None
+    
+            if not mafia_alive and len(alive_players) > 0:
+                winner_team = "Citizens"
+            elif len(mafia_alive) >= len(citizens_alive) and len(alive_players) > 0:
+                winner_team = "Mafia"
+    
+            if winner_team:
+                state["winner_declared"] = True
+    
+                # --- 🏆 DISTRIBUTE REWARDS ---
+                for p, d in state["players"].items():
+                    role = d.get("role")
+                    if role == "Observer": continue
+    
+                    # Check if player is on the winning team
+                    is_winner = (winner_team == "Mafia" and role == "Mafia") or \
+                                (winner_team == "Citizens" and role in ["Citizen", "Doctor", "Detective"])
+    
+                    if is_winner:
+                        if d.get("is_alive"):
+                            d["points"] += 40
+                            d["stars"] += 3
+                            state["audit_log"].insert(0, f"🏆 {p} earned 40pts/3⭐ for a Living Win!")
+                        else:
+                            d["points"] += 10
+                            d["stars"] += 1
+                            state["audit_log"].insert(0, f"🎗️ {p} earned 10pts/1⭐ for a Ghost Win!")
+    
+                save_state(state)
+                st.rerun()
+    
+        # --- 2. VICTORY OVERLAY & RESET ---
+        if state.get("winner_declared"):
+            if not mafia_alive:
+                st.balloons()
+                st.success("🏆 VICTORY: Citizens Won!")
+            else:
+                st.snow()
+                st.error("💀 VICTORY: Mafia Won!")
+    
+            # This button allows you to clear the game state so you can start over
+            if st.button("🔄 Reset Game / Back to Lobby", key="reset_after_win", use_container_width=True):
+                state["mafia_active"] = False
+                state["winner_declared"] = False
+                # Clear votes for the next round
+                for p in state["players"]:
+                    state["players"][p]["mafia_vote"] = None
+                    state["players"][p]["last_checked"] = None
+                save_state(state)
+                st.rerun()
+    
+        st.divider()
+    
+        # --- 1. GOD VIEW (Admin Only Intel) ---
+        st.subheader("👁️ Town Overview (Secret)")
+    
+        # Build the data for the God View table
+        god_view_list = []
+        for p_name, p_data in state["players"].items():
+            # Determine the Power Display (Swing Vote indicator)
+            weight = p_data.get("vote_weight", 1)
+            power_display = "⚡ 2 (Swing)" if weight > 1 else "1"
+    
+            # Format the vote for easier reading
+            current_vote = p_data.get("mafia_vote")
+            vote_display = current_vote if current_vote not in [None, "None"] else "⚪ Pending"
+    
+            god_view_list.append({
+                "Player": p_name,
+                "Role": p_data.get("role", "N/A"),
+                "Status": "✅ Alive" if p_data.get("is_alive", True) else "💀 DEAD",
+                "Stars": p_data.get("stars", 0),
+                "Vote": vote_display,
+                "Power": power_display  # <--- Shows you the 3-star spent status
+            })
+    
+        # Display as a clean table
+        st.table(god_view_list)
+    
+        st.divider()
+    
+        # --- 3. MAFIA CONTROLS ---
+        st.subheader("🕵️ Mafia Management")
+    
+        if not state.get("mafia_active"):
+            eligible = [p for p in state["players"] if
+                        not state["players"][p].get("is_admin") and not state["players"][p].get("is_judge")]
+    
+            st.write(f"Eligible Players: {len(eligible)}")
+    
+            # 1. ADD THE QUANTITY SELECTOR
+            # --- THE MATH  ---
+            # If 6 players: (6-1) // 2 = 2 Mafia max.
+            # If 5 players: (5-1) // 2 = 2 Mafia max.
+            # If 7 players: (7-1) // 2 = 3 Mafia max.
+            max_mafia = max(1, (len(eligible) - 1) // 2)
+    
+            num_mafia_input = st.number_input("Number of Mafia Members",
+                                              min_value=1,
+                                              max_value=max_mafia,
+                                              value=1,
+                                              help=f"Capped at {max_mafia} to ensure Citizens start with a majority.")
+    
+            if st.button("🚀 Start New Mafia Game", key="start_mafia_btn"):
+                if len(eligible) >= 4:  # Lowered to 4 for more flexibility
+                    random.shuffle(eligible)
+                    state["winner_declared"] = False
+    
+                    # 2. USE THE INPUT VALUE
+                    mafia_team = eligible[:num_mafia_input]
+    
+                    # Assign Doctor and Detective from the remaining shuffled list
+                    # We use indexing to make sure we don't pick the same person twice
+                    remaining = eligible[num_mafia_input:]
+                    doctor = remaining[0] if len(remaining) > 0 else None
+                    detective = remaining[1] if len(remaining) > 1 else None
+    
+                    for p in state["players"]:
+                        state["players"][p]["last_checked"] = None
+                        state["players"][p]["vote_weight"] = 1
+                        state["players"][p]["mafia_vote"] = None
+    
+                        if p in eligible:
+                            state["players"][p]["is_alive"] = True
+                            if p in mafia_team:
+                                state["players"][p]["role"] = "Mafia"
+                            elif p == doctor:
+                                state["players"][p]["role"] = "Doctor"
+                            elif p == detective:
+                                state["players"][p]["role"] = "Detective"
+                            else:
+                                state["players"][p]["role"] = "Citizen"
+                        else:
+                            state["players"][p]["role"] = "Observer"
+                            state["players"][p]["is_alive"] = True
+    
+                    state["mafia_active"] = True
+                    state["mafia_phase"] = "Night"
+                    state["mafia_log"] = [f"🌑 GAME START: {num_mafia_input} Mafia are among us!"]
+                    save_state(state)
+                    st.rerun()
+                else:
+                    st.error(f"Need at least 4 players. You have {len(eligible)}.")
+    
         else:
-            st.snow()
-            st.error("💀 VICTORY: Mafia Won!")
-
-        # This button allows you to clear the game state so you can start over
-        if st.button("🔄 Reset Game / Back to Lobby", key="reset_after_win", use_container_width=True):
-            state["mafia_active"] = False
-            state["winner_declared"] = False
-            # Clear votes for the next round
-            for p in state["players"]:
-                state["players"][p]["mafia_vote"] = None
-                state["players"][p]["last_checked"] = None
-            save_state(state)
-            st.rerun()
-
-    st.divider()
-
-    # --- 1. GOD VIEW (Admin Only Intel) ---
-    st.subheader("👁️ Town Overview (Secret)")
-
-    # Build the data for the God View table
-    god_view_list = []
-    for p_name, p_data in state["players"].items():
-        # Determine the Power Display (Swing Vote indicator)
-        weight = p_data.get("vote_weight", 1)
-        power_display = "⚡ 2 (Swing)" if weight > 1 else "1"
-
-        # Format the vote for easier reading
-        current_vote = p_data.get("mafia_vote")
-        vote_display = current_vote if current_vote not in [None, "None"] else "⚪ Pending"
-
-        god_view_list.append({
-            "Player": p_name,
-            "Role": p_data.get("role", "N/A"),
-            "Status": "✅ Alive" if p_data.get("is_alive", True) else "💀 DEAD",
-            "Stars": p_data.get("stars", 0),
-            "Vote": vote_display,
-            "Power": power_display  # <--- Shows you the 3-star spent status
-        })
-
-    # Display as a clean table
-    st.table(god_view_list)
-
-    # --- 2. GLOBAL ANNOUNCEMENTS ---
+            # --- ACTIVE GAME CONTROLS ---
+            c1, c2 = st.columns(2)
+            # 1. Action Button (Changes based on Phase)
+            if state.get("mafia_phase") == "Night":
+                if c1.button("🌅 End Night & Process Kill", key="process_kill_btn", use_container_width=True):
+                    # --- 1. SAFETY CHECK ---
+                    if "mafia_log" not in state:
+                        state["mafia_log"] = []
+    
+                    # --- 2. GET ROLES/VOTES ---
+                    mafia_votes = {p: d["mafia_vote"] for p, d in state["players"].items() if
+                                   d.get("role") == "Mafia" and d["is_alive"]}
+                    from data_manager import check_mafia_unanimous
+                    target = check_mafia_unanimous(mafia_votes)
+    
+                    protected = next((d["mafia_vote"] for p, d in state["players"].items() if
+                                      d.get("role") == "Doctor" and d["is_alive"]), None)
+    
+                    # --- 3. RESOLVE & LOG ---
+                    if target and target == protected:
+                        state["mafia_log"].insert(0,
+                                                  f"🏥 SAVED: The Mafia tried to kill {target}, but the Doctor was there!")
+                    elif target:
+                        state["players"][target]["is_alive"] = False
+                        state["mafia_log"].insert(0, f"💀 MORNING: {target} was found dead. The Mafia struck!")
+                    else:
+                        # Note: Added a more descriptive message for clarity
+                        state["mafia_log"].insert(0, "🌅 MORNING: No one died. The Mafia couldn't agree on a target.")
+    
+                    # --- 4. RESET FOR DAY ---
+                    state["mafia_phase"] = "Day"
+                    for p in state["players"]:
+                        state["players"][p]["mafia_vote"] = None
+                        # Just in case someone bought a swing vote during the night (which they shouldn't)
+                        state["players"][p]["vote_weight"] = 1
+    
+                    save_state(state)
+                    st.rerun()
+    
+            else:
+                # DAY TO NIGHT (Process Town Vote)
+                if c1.button("🌙 Set to NIGHT (Process Town Vote)", key="btn_set_night", use_container_width=True):
+                    # --- WEIGHTED VOTE COUNTING ---
+                    vote_tally = {}
+    
+                    # 1. Ensure the log exists
+                    if "mafia_log" not in state:
+                        state["mafia_log"] = []
+    
+                    for p, d in state["players"].items():
+                        if d.get("is_alive") and d.get("mafia_vote") not in [None, "None"]:
+                            target = d["mafia_vote"]
+                            weight = d.get("vote_weight", 1)  # Default to 1 if not set
+                            vote_tally[target] = vote_tally.get(target, 0) + weight
+    
+                    if vote_tally:
+                        max_votes = max(vote_tally.values())
+                        leaders = [who for who, count in vote_tally.items() if count == max_votes]
+    
+                        if len(leaders) == 1:
+                            victim = leaders[0]
+                            state["players"][victim]["is_alive"] = False
+    
+                            # Check if any living player actually used a weight > 1 this round
+                            swing_used = any(
+                                d.get("vote_weight", 1) > 1 for p, d in state["players"].items() if d.get("is_alive"))
+    
+                            if swing_used:
+                                msg = f"⚖️ EXECUTION: {victim} was lynched (Weighted Vote!)."
+                            else:
+                                msg = f"⚖️ EXECUTION: {victim} was lynched by majority vote."
+    
+                            state["mafia_log"].insert(0, msg)
+                        else:
+                            state["mafia_log"].insert(0, f"⚖️ TIE: The town was split. No one was executed.")
+                    else:
+                        state["mafia_log"].insert(0, "🌙 NIGHT FALLS: No votes were cast.")
+    
+                    # Reset phase and votes
+                    state["mafia_phase"] = "Night"
+                    for p in state["players"]:
+                        state["players"][p]["mafia_vote"] = None
+                        state["players"][p]["vote_weight"] = 1  # Reset weight for everyone
+                    save_state(state)
+                    st.rerun()
+    
+            # 3. Emergency Stop Button
+            if c2.button("🛑 END GAME", key="btn_end_mafia", use_container_width=True):
+                state["mafia_active"] = False
+                if "mafia_log" not in state:
+                    state["mafia_log"] = []
+                state["mafia_log"].insert(0, "🛑 GAME OVER: The Mafia game has been ended by the Admin.")
+                save_state(state)
+                st.rerun()
+            
+        pass 
+#------------------------------------------------------------Split or Steal------------------------------------------------------------------
+    with tab_sos:
+        # This is where our new game lives
+        admin_sos_panel(state)
+            # --- 4. SPLIT OR STEAL CONTROLS ---
+        st.divider()
+        admin_sos_panel(state) # This calls the panel we built earlier
+#------------------------------------------------------------Global Broadcast---------------------------------------------------------------
+    with tab_broadcast:
+        # Move the "Global Broadcast" text input and buttons here.
+        # --- 2. GLOBAL ANNOUNCEMENTS ---
     st.subheader("📣 Global Broadcast")
     
     # Show the current message so you know what's live
@@ -487,255 +675,99 @@ def display_admin(state):
             save_state(state)
             st.success("Broadcast sent!")
             st.rerun() # Refresh to show the info box above
+        pass
 
-    st.divider()
+#----------------------------------------------------------------Judge Tools----------------------------------------------------------
 
-    # --- 3. MAFIA CONTROLS ---
-    st.subheader("🕵️ Mafia Management")
-
-    if not state.get("mafia_active"):
-        eligible = [p for p in state["players"] if
-                    not state["players"][p].get("is_admin") and not state["players"][p].get("is_judge")]
-
-        st.write(f"Eligible Players: {len(eligible)}")
-
-        # 1. ADD THE QUANTITY SELECTOR
-        # --- THE MATH  ---
-        # If 6 players: (6-1) // 2 = 2 Mafia max.
-        # If 5 players: (5-1) // 2 = 2 Mafia max.
-        # If 7 players: (7-1) // 2 = 3 Mafia max.
-        max_mafia = max(1, (len(eligible) - 1) // 2)
-
-        num_mafia_input = st.number_input("Number of Mafia Members",
-                                          min_value=1,
-                                          max_value=max_mafia,
-                                          value=1,
-                                          help=f"Capped at {max_mafia} to ensure Citizens start with a majority.")
-
-        if st.button("🚀 Start New Mafia Game", key="start_mafia_btn"):
-            if len(eligible) >= 4:  # Lowered to 4 for more flexibility
-                random.shuffle(eligible)
-                state["winner_declared"] = False
-
-                # 2. USE THE INPUT VALUE
-                mafia_team = eligible[:num_mafia_input]
-
-                # Assign Doctor and Detective from the remaining shuffled list
-                # We use indexing to make sure we don't pick the same person twice
-                remaining = eligible[num_mafia_input:]
-                doctor = remaining[0] if len(remaining) > 0 else None
-                detective = remaining[1] if len(remaining) > 1 else None
-
-                for p in state["players"]:
-                    state["players"][p]["last_checked"] = None
-                    state["players"][p]["vote_weight"] = 1
-                    state["players"][p]["mafia_vote"] = None
-
-                    if p in eligible:
-                        state["players"][p]["is_alive"] = True
-                        if p in mafia_team:
-                            state["players"][p]["role"] = "Mafia"
-                        elif p == doctor:
-                            state["players"][p]["role"] = "Doctor"
-                        elif p == detective:
-                            state["players"][p]["role"] = "Detective"
-                        else:
-                            state["players"][p]["role"] = "Citizen"
-                    else:
-                        state["players"][p]["role"] = "Observer"
-                        state["players"][p]["is_alive"] = True
-
-                state["mafia_active"] = True
-                state["mafia_phase"] = "Night"
-                state["mafia_log"] = [f"🌑 GAME START: {num_mafia_input} Mafia are among us!"]
-                save_state(state)
-                st.rerun()
-            else:
-                st.error(f"Need at least 4 players. You have {len(eligible)}.")
-
-    else:
-        # --- ACTIVE GAME CONTROLS ---
-        c1, c2 = st.columns(2)
-        # 1. Action Button (Changes based on Phase)
-        if state.get("mafia_phase") == "Night":
-            if c1.button("🌅 End Night & Process Kill", key="process_kill_btn", use_container_width=True):
-                # --- 1. SAFETY CHECK ---
-                if "mafia_log" not in state:
-                    state["mafia_log"] = []
-
-                # --- 2. GET ROLES/VOTES ---
-                mafia_votes = {p: d["mafia_vote"] for p, d in state["players"].items() if
-                               d.get("role") == "Mafia" and d["is_alive"]}
-                from data_manager import check_mafia_unanimous
-                target = check_mafia_unanimous(mafia_votes)
-
-                protected = next((d["mafia_vote"] for p, d in state["players"].items() if
-                                  d.get("role") == "Doctor" and d["is_alive"]), None)
-
-                # --- 3. RESOLVE & LOG ---
-                if target and target == protected:
-                    state["mafia_log"].insert(0,
-                                              f"🏥 SAVED: The Mafia tried to kill {target}, but the Doctor was there!")
-                elif target:
-                    state["players"][target]["is_alive"] = False
-                    state["mafia_log"].insert(0, f"💀 MORNING: {target} was found dead. The Mafia struck!")
-                else:
-                    # Note: Added a more descriptive message for clarity
-                    state["mafia_log"].insert(0, "🌅 MORNING: No one died. The Mafia couldn't agree on a target.")
-
-                # --- 4. RESET FOR DAY ---
-                state["mafia_phase"] = "Day"
-                for p in state["players"]:
-                    state["players"][p]["mafia_vote"] = None
-                    # Just in case someone bought a swing vote during the night (which they shouldn't)
-                    state["players"][p]["vote_weight"] = 1
-
-                save_state(state)
-                st.rerun()
-
-        else:
-            # DAY TO NIGHT (Process Town Vote)
-            if c1.button("🌙 Set to NIGHT (Process Town Vote)", key="btn_set_night", use_container_width=True):
-                # --- WEIGHTED VOTE COUNTING ---
-                vote_tally = {}
-
-                # 1. Ensure the log exists
-                if "mafia_log" not in state:
-                    state["mafia_log"] = []
-
-                for p, d in state["players"].items():
-                    if d.get("is_alive") and d.get("mafia_vote") not in [None, "None"]:
-                        target = d["mafia_vote"]
-                        weight = d.get("vote_weight", 1)  # Default to 1 if not set
-                        vote_tally[target] = vote_tally.get(target, 0) + weight
-
-                if vote_tally:
-                    max_votes = max(vote_tally.values())
-                    leaders = [who for who, count in vote_tally.items() if count == max_votes]
-
-                    if len(leaders) == 1:
-                        victim = leaders[0]
-                        state["players"][victim]["is_alive"] = False
-
-                        # Check if any living player actually used a weight > 1 this round
-                        swing_used = any(
-                            d.get("vote_weight", 1) > 1 for p, d in state["players"].items() if d.get("is_alive"))
-
-                        if swing_used:
-                            msg = f"⚖️ EXECUTION: {victim} was lynched (Weighted Vote!)."
-                        else:
-                            msg = f"⚖️ EXECUTION: {victim} was lynched by majority vote."
-
-                        state["mafia_log"].insert(0, msg)
-                    else:
-                        state["mafia_log"].insert(0, f"⚖️ TIE: The town was split. No one was executed.")
-                else:
-                    state["mafia_log"].insert(0, "🌙 NIGHT FALLS: No votes were cast.")
-
-                # Reset phase and votes
-                state["mafia_phase"] = "Night"
-                for p in state["players"]:
-                    state["players"][p]["mafia_vote"] = None
-                    state["players"][p]["vote_weight"] = 1  # Reset weight for everyone
-                save_state(state)
-                st.rerun()
-
-        # 3. Emergency Stop Button
-        if c2.button("🛑 END GAME", key="btn_end_mafia", use_container_width=True):
-            state["mafia_active"] = False
-            if "mafia_log" not in state:
-                state["mafia_log"] = []
-            state["mafia_log"].insert(0, "🛑 GAME OVER: The Mafia game has been ended by the Admin.")
+    with tab_judge:
+        # Move the "Judge Tools" and "Apply Adjustments" code here.
+             # --- 4. PLAYER ADJUSTMENTS ---
+        st.subheader("⚖️ Judge Tools")
+        target_player = st.selectbox("Select Player", options=list(state["players"].keys()), key="adjust_target")
+        col_p, col_s = st.columns(2)
+        amt_pts = col_p.number_input("Points", value=0, key="adj_pts")
+        amt_stars = col_s.number_input("Stars", value=0, key="adj_stars")
+    
+        # Add a unique key so Streamlit doesn't get confused
+        if st.button("Apply Adjustments", key="admin_apply_adjustments_btn"):
+            state["players"][target_player]["points"] += amt_pts
+            state["players"][target_player]["stars"] += amt_stars
+            state["audit_log"].insert(0, f"⚖️ ADMIN adjusted {target_player}: {amt_pts}pts, {amt_stars}⭐")
             save_state(state)
             st.rerun()
-
-    # --- 4. SPLIT OR STEAL CONTROLS ---
-    st.divider()
-    admin_sos_panel(state) # This calls the panel we built earlier
+        pass
+#----------------------------------------------------------------System Maintenance-----------------------------------------------------
+    with tab_sys:
+        # Move the "System Maintenance", "Manage Players", 
+        # and "Reset System" code here.
+                #---Player Maintenance---
+        st.subheader("🛠️ System Maintenance")
     
-    st.divider()  # This divider is now outside the if/else logic
+        # This creates two tabs: one for individual player fixes, one for the Nuke
+        tab_manage, tab_nuke = st.tabs(["Manage Players", "Reset System"])
     
-    # --- 4. PLAYER ADJUSTMENTS ---
-    st.subheader("⚖️ Judge Tools")
-    target_player = st.selectbox("Select Player", options=list(state["players"].keys()), key="adjust_target")
-    col_p, col_s = st.columns(2)
-    amt_pts = col_p.number_input("Points", value=0, key="adj_pts")
-    amt_stars = col_s.number_input("Stars", value=0, key="adj_stars")
-
-    # Add a unique key so Streamlit doesn't get confused
-    if st.button("Apply Adjustments", key="admin_apply_adjustments_btn"):
-        state["players"][target_player]["points"] += amt_pts
-        state["players"][target_player]["stars"] += amt_stars
-        state["audit_log"].insert(0, f"⚖️ ADMIN adjusted {target_player}: {amt_pts}pts, {amt_stars}⭐")
-        save_state(state)
-        st.rerun()
-
-#---Player Maintenance---
-    st.divider()
-    st.subheader("🛠️ System Maintenance")
-
-    # This creates two tabs: one for individual player fixes, one for the Nuke
-    tab_manage, tab_nuke = st.tabs(["Manage Players", "Reset System"])
-
-    with tab_manage:
-        st.write("Force a player to become a Ghost and reassign their role if necessary.")
-
-        # Only show players who are currently ALIVE and part of the active game
-        alive_in_game = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Observer"]
-
-        target_to_kill = st.selectbox("Select Player to 'Ghost'",
-                                      options=["Select"] + alive_in_game,
-                                      key="force_kill_select")
-
-        if st.button("💀 Ghost and Reassign Role", type="secondary"):
-            if target_to_kill != "Select":
-                old_role = state["players"][target_to_kill].get("role")
-                state["players"][target_to_kill]["is_alive"] = False
-
-                # --- ROLE REASSIGNMENT LOGIC ---
-                if old_role in ["Doctor", "Detective", "Mafia"]:
-                    # Find living Citizens to inherit the role
-                    eligible_heirs = [p for p, d in state["players"].items()
-                                      if d.get("is_alive") and d.get("role") == "Citizen"]
-
-                    if eligible_heirs:
-                        new_heir = random.choice(eligible_heirs)
-                        state["players"][new_heir]["role"] = old_role
-
-                        # Log it for the game history
-                        state["mafia_log"].insert(0,
-                                                  f"🎭 ROLE SHIFT: {target_to_kill} ({old_role}) left. Someone else is the new {old_role}!")
-                        
-                    else:
-                        state["mafia_log"].insert(0,
-                                                  f"⚠️ ROLE LOST: {target_to_kill} was the {old_role}, but no citizens were left.")
-
-                state["audit_log"].insert(0, f"💀 ADMIN forced {target_to_kill} to Ghost status.")
-                save_state(state)
-                st.success(f"{target_to_kill} is now a Ghost. Role reassigned if applicable.")
+        with tab_manage:
+            st.write("Force a player to become a Ghost and reassign their role if necessary.")
+    
+            # Only show players who are currently ALIVE and part of the active game
+            alive_in_game = [p for p, d in state["players"].items() if d.get("is_alive") and d.get("role") != "Observer"]
+    
+            target_to_kill = st.selectbox("Select Player to 'Ghost'",
+                                          options=["Select"] + alive_in_game,
+                                          key="force_kill_select")
+    
+            if st.button("💀 Ghost and Reassign Role", type="secondary"):
+                if target_to_kill != "Select":
+                    old_role = state["players"][target_to_kill].get("role")
+                    state["players"][target_to_kill]["is_alive"] = False
+    
+                    # --- ROLE REASSIGNMENT LOGIC ---
+                    if old_role in ["Doctor", "Detective", "Mafia"]:
+                        # Find living Citizens to inherit the role
+                        eligible_heirs = [p for p, d in state["players"].items()
+                                          if d.get("is_alive") and d.get("role") == "Citizen"]
+    
+                        if eligible_heirs:
+                            new_heir = random.choice(eligible_heirs)
+                            state["players"][new_heir]["role"] = old_role
+    
+                            # Log it for the game history
+                            state["mafia_log"].insert(0,
+                                                      f"🎭 ROLE SHIFT: {target_to_kill} ({old_role}) left. Someone else is the new {old_role}!")
+                            
+                        else:
+                            state["mafia_log"].insert(0,
+                                                      f"⚠️ ROLE LOST: {target_to_kill} was the {old_role}, but no citizens were left.")
+    
+                    state["audit_log"].insert(0, f"💀 ADMIN forced {target_to_kill} to Ghost status.")
+                    save_state(state)
+                    st.success(f"{target_to_kill} is now a Ghost. Role reassigned if applicable.")
+                    st.rerun()
+    
+        with tab_nuke:
+            # --- YOUR EXISTING NUKE CODE GOES HERE ---
+            st.warning("⚠️ **DANGER:** This wipes ALL players and ALL scores.")
+            confirm_nuke = st.checkbox("I confirm I want to destroy all data.")
+    
+            if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke):
+                default_state = {
+                    "players": {},
+                    "used_ids": [],
+                    "audit_log": ["🚀 System Reinitialized"],
+                    "mafia_active": False,
+                    "mafia_phase": "Night",
+                    "mafia_log": [],
+                    "winner_declared": False,
+                    "global_event": {"broadcast_message": ""}
+                }
+                save_state(default_state)
+                if "user" in st.session_state:
+                    del st.session_state["user"]
+                st.success("Database wiped. Redirecting...")
                 st.rerun()
 
-    with tab_nuke:
-        # --- YOUR EXISTING NUKE CODE GOES HERE ---
-        st.warning("⚠️ **DANGER:** This wipes ALL players and ALL scores.")
-        confirm_nuke = st.checkbox("I confirm I want to destroy all data.")
-
-        if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke):
-            default_state = {
-                "players": {},
-                "used_ids": [],
-                "audit_log": ["🚀 System Reinitialized"],
-                "mafia_active": False,
-                "mafia_phase": "Night",
-                "mafia_log": [],
-                "winner_declared": False,
-                "global_event": {"broadcast_message": ""}
-            }
-            save_state(default_state)
-            if "user" in st.session_state:
-                del st.session_state["user"]
-            st.success("Database wiped. Redirecting...")
-            st.rerun()
+        pass
+    
 
 def admin_sos_panel(state):
     st.header("🎲 Split or Steal: Admin Control")
