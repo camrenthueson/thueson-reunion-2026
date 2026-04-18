@@ -598,6 +598,69 @@ def display_admin(state):
 
     st.divider()  # This divider is now outside the if/else logic
 
+    def admin_sos_panel(state):
+    st.header("🎲 Split or Steal: Admin Control")
+    
+    # 1. Global Toggle
+    sos_on = st.toggle("Activate Split or Steal Tab for Players", value=state.get("sos_active", False))
+    if sos_on != state.get("sos_active"):
+        state["sos_active"] = sos_on
+        save_state(state)
+        st.rerun()
+
+    if not state.get("sos_active"):
+        st.info("Game tab is currently hidden from players.")
+        return
+
+    # 2. Configuration Form
+    with st.form("sos_config_form"):
+        st.subheader("Settings")
+        col1, col2 = st.columns(2)
+        
+        buy_in = col1.number_input("Buy-In Amount", min_value=0, value=state["sos_config"]["buy_in"])
+        is_percent = col1.checkbox("Use % for Buy-In", value=state["sos_config"]["is_percent"])
+        bonus = col2.number_input("House Bonus Points", min_value=0, value=state["sos_config"]["house_bonus"])
+        pref_size = col2.selectbox("Preferred Group Size", [3, 2], index=0 if state["sos_config"]["pref_size"] == 3 else 1)
+        
+        st.write("**Star Item Pricing**")
+        p_cols = st.columns(4)
+        peep_p = p_cols[0].number_input("Peep", 0, 10, state["sos_config"]["item_prices"]["peep"])
+        shield_p = p_cols[1].number_input("Shield", 0, 10, state["sos_config"]["item_prices"]["shield"])
+        insur_p = p_cols[2].number_input("Insurance", 0, 10, state["sos_config"]["item_prices"]["insurance"])
+        tip_p = p_cols[3].number_input("Tip", 0, 10, state["sos_config"]["item_prices"]["tip"])
+        
+        if st.form_submit_button("Update Game Settings"):
+            state["sos_config"] = {
+                "buy_in": buy_in,
+                "is_percent": is_percent,
+                "house_bonus": bonus,
+                "pref_size": pref_size,
+                "item_prices": {"peep": peep_p, "shield": shield_p, "insurance": insur_p, "tip": tip_p}
+            }
+            save_state(state)
+            st.success("Settings updated!")
+
+    # 3. Player Selection & Start Game
+    st.divider()
+    st.subheader("Start New Round")
+    
+    # List all players who aren't admins (to keep it a player game)
+    players = state["players"]
+    eligible = [p for p in players if not players[p].get("is_admin")]
+    
+    selected_players = []
+    cols = st.columns(3)
+    for idx, name in enumerate(eligible):
+        if cols[idx % 3].checkbox(name, key=f"sos_sel_{name}"):
+            selected_players.append(name)
+            
+    if st.button("Generate Groups & Start Game", type="primary"):
+        if len(selected_players) < 2:
+            st.error("You need at least 2 players to play!")
+        else:
+            # We will build the 'start_sos_game' logic in the next step
+            st.warning("Grouping logic coming in the next step!")
+    
     # --- 4. PLAYER ADJUSTMENTS ---
     st.subheader("⚖️ Judge Tools")
     target_player = st.selectbox("Select Player", options=list(state["players"].keys()), key="adjust_target")
