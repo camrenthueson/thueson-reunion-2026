@@ -125,6 +125,44 @@ def display_dashboard():
     c_m1.metric("Points", player_data["points"])
     c_m2.metric("Stars", player_data["stars"])
 
+    # --- NEW: STAR TRANSFER TOOL ---
+    with st.expander("🎁 Gift a Star"):
+        if player_data["stars"] > 0:
+            # Filter targets: No Admins, No Judges, and Not Yourself
+            gift_targets = [
+                p for p, info in state["players"].items() 
+                if p != user and not info.get("is_admin") and not info.get("is_judge")
+            ]
+            
+            target_col, button_col = st.columns([2, 1])
+            
+            recipient = target_col.selectbox(
+                "Recipient",
+                options=["Select Name"] + gift_targets,
+                key="gift_recipient_select",
+                label_visibility="collapsed"
+            )
+            
+            if button_col.button("Send 1 ⭐", use_container_width=True):
+                if recipient != "Select Name":
+                    # Execute Transfer
+                    player_data["stars"] -= 1
+                    state["players"][recipient]["stars"] += 1
+                    
+                    # Log it
+                    state["audit_log"].insert(0, f"🎁 {user} gifted a star to {recipient}!")
+                    
+                    save_state(state)
+                    st.toast(f"Star sent to {recipient}!", icon="✨")
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error("Select someone first!")
+        else:
+            st.info("You need at least 1 Star to send a gift.")
+
+    st.divider()
+    
     st.subheader("Your Active Missions")
     
     # Get the global list of what is turned off
