@@ -598,7 +598,7 @@ def display_admin(state):
 
     st.divider()  # This divider is now outside the if/else logic
 
-    def admin_sos_panel(state):
+def admin_sos_panel(state):
     st.header("🎲 Split or Steal: Admin Control")
     
     # 1. Global Toggle
