@@ -992,6 +992,8 @@ else:
 
     if state.get("mafia_active"):
         menu_options.append("Mafia Game")
+    if state.get("sos_active"):
+        menu_options.append("Split or Steal")
     if player_data.get("is_admin"):
         menu_options.append("Admin Portal")
 
@@ -1009,5 +1011,7 @@ else:
             st.write(entry)
     elif choice == "Mafia Game":
         display_mafia()
+    elif choice == "Split or Steal":
+        display_sos_game(state, user)
     elif choice == "Admin Portal":
         display_admin(state)
