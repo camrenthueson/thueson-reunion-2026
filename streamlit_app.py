@@ -298,6 +298,59 @@ def display_dashboard():
                             save_state(state)
                             st.rerun()
 
+def display_sos_game(state, user):
+    st.title("🎲 Split or Steal")
+    
+    # 1. Check if the game has actually started
+    if state.get("sos_phase") == "LOBBY":
+        st.info("The Admin is currently setting up the round. Please wait...")
+        if st.button("Refresh"):
+            st.rerun()
+        return
+
+    # 2. Find the user's group
+    user_group = None
+    for group in state.get("sos_groups", []):
+        if user in group["members"]:
+            user_group = group
+            break
+            
+    if not user_group:
+        st.warning("You are not participating in this round. Keep an eye on the Audit Log for the results!")
+        return
+
+    # 3. Game UI
+    p_state = user_group["player_states"][user]
+    opponents = [m for m in user_group["members"] if m != user]
+    
+    st.subheader(f"💰 The Pot: {user_group['pot']} Points")
+    st.write(f"You are grouped with: **{', '.join(opponents)}**")
+    
+    # Show Star Items (Bribery / Tactical)
+    st.divider()
+    st.write("### 🛠 Tactical Items (Limit 1)")
+    # We will build the Star Ability buttons in the next step! 
+    # For now, let's just get the Split/Steal working.
+
+    st.divider()
+    
+    # 4. The Decision
+    if p_state["choice"] is not None:
+        st.success(f"Locked in: **{p_state['choice']}**")
+        st.info("Waiting for the Admin to end the round and reveal results.")
+    else:
+        col1, col2 = st.columns(2)
+        if col1.button("🤝 SPLIT", use_container_width=True):
+            p_state["choice"] = "Split"
+            save_state(state)
+            st.rerun()
+        if col2.button("😈 STEAL", use_container_width=True, type="primary"):
+            p_state["choice"] = "Steal"
+            save_state(state)
+            st.rerun()
+
+    if st.button("Check for Updates / Refresh"):
+        st.rerun()
 
 # --- 4. ADMIN CONTROL PANEL FUNCTION ---
 def display_admin(state):
