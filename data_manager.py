@@ -5,10 +5,36 @@ STATE_FILE = "game_state.json"
 
 def load_state():
     if not os.path.exists(STATE_FILE):
-        # Initialize a blank state if it doesn't exist
-        return {"players": {}, "audit_log": [], "used_ids": [], "mafia_active": False}
-    with open(STATE_FILE, "r") as f:
-        return json.load(f)
+        # Initial state for a brand new file
+        state = {
+            "players": {}, 
+            "audit_log": [], 
+            "used_ids": [], 
+            "mafia_active": False
+        }
+    else:
+        with open(STATE_FILE, "r") as f:
+            state = json.load(f)
+
+    # --- Add Split or Steal Defaults ---
+    # This ensures these keys exist even in an old save file
+    state.setdefault("sos_active", False)
+    state.setdefault("sos_phase", "LOBBY") # LOBBY, NEGOTIATION, RESULTS
+    state.setdefault("sos_config", {
+        "buy_in": 100,
+        "is_percent": False,
+        "house_bonus": 200,
+        "pref_size": 3,
+        "item_prices": {
+            "peep": 2,
+            "shield": 1,
+            "insurance": 1,
+            "tip": 1
+        }
+    })
+    state.setdefault("sos_groups", []) # This will store the actual game data
+    
+    return state
 
 def save_state(state):
     with open(STATE_FILE, "w") as f:
