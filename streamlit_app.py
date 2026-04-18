@@ -649,6 +649,10 @@ def display_admin(state):
             save_state(state)
             st.rerun()
 
+    # --- 4. SPLIT OR STEAL CONTROLS ---
+    st.divider()
+    admin_sos_panel(state) # This calls the panel we built earlier
+    
     st.divider()  # This divider is now outside the if/else logic
     
     # --- 4. PLAYER ADJUSTMENTS ---
