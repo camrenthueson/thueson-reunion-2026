@@ -377,10 +377,11 @@ def display_admin(state):
             "Disable Mission Categories:",
             options=all_types,
             default=current_disabled,
-            help="Missions in these categories will not appear for players."
+            help="Missions in these categories will not appear for players.",
+            key="ms_disable_select"
         )
 
-        if st.button("Update Global Mission Rules", use_container_width=True):
+        if st.button("Update Global Mission Rules", key="ms_update_btn", use_container_width=True):
             state["disabled_types"] = disabled
             save_state(state)
             st.toast("Rules Updated!", icon="✅")
@@ -466,7 +467,7 @@ def display_admin(state):
             eligible = [p for p in state["players"] if
                         not state["players"][p].get("is_admin") and not state["players"][p].get("is_judge")]
             max_mafia = max(1, (len(eligible) - 1) // 2)
-            num_mafia_input = st.number_input("Number of Mafia Members", min_value=1, max_value=max_mafia, value=1)
+            num_mafia_input = st.number_input("Number of Mafia Members", min_value=1, max_value=max_mafia, value=1, key="num_mafia_input")
 
             if st.button("🚀 Start New Mafia Game", key="start_mafia_btn"):
                 if len(eligible) >= 4:
@@ -503,7 +504,7 @@ def display_admin(state):
         else:
             c1, c2 = st.columns(2)
             if state.get("mafia_phase") == "Night":
-                if c1.button("🌅 End Night & Process Kill", use_container_width=True):
+                if c1.button("🌅 End Night & Process Kill", use_container_width=True, key="phase_toggle_btn"):
                     from data_manager import check_mafia_unanimous
                     mafia_votes = {p: d["mafia_vote"] for p, d in state["players"].items() if
                                    d.get("role") == "Mafia" and d["is_alive"]}
@@ -557,12 +558,12 @@ def display_admin(state):
         current_msg = state.get("global_event", {}).get("broadcast_message", "")
         if current_msg:
             st.info(f"Currently Live: {current_msg}")
-            if st.button("🗑️ Clear Current Alert"):
+            if st.button("🗑️ Clear Current Alert", key="clear_bc_btn"):
                 state["global_event"]["broadcast_message"] = ""
                 save_state(state);
                 st.rerun()
-        msg = st.text_input("Type a challenge for everyone:", key="admin_msg")
-        if st.button("Send Alert"):
+        msg = st.text_input("Type a challenge for everyone:", key="admin_msg_input")
+        if st.button("Send Alert", key="send_bc_btn"):
             if msg:
                 state.setdefault("global_event", {})["broadcast_message"] = msg
                 state["audit_log"].insert(0, f"📢 ADMIN: {msg}")
@@ -572,7 +573,7 @@ def display_admin(state):
     # --- TAB 5: JUDGE TOOLS ---
     with tab_judge:
         st.subheader("⚖️ Manual Adjustments")
-        target_player = st.selectbox("Select Player", options=list(state["players"].keys()), key="adjust_target")
+        target_player = st.selectbox("Select Player", options=list(state["players"].keys()), key="adjust_target_sel")
         col_p, col_s = st.columns(2)
         amt_pts = col_p.number_input("Points", value=0, key="adj_pts")
         amt_stars = col_s.number_input("Stars", value=0, key="adj_stars")
@@ -592,7 +593,7 @@ def display_admin(state):
                              d.get("is_alive") and d.get("role") != "Observer"]
             target_to_kill = st.selectbox("Select Player to 'Ghost'", options=["Select"] + alive_in_game,
                                           key="force_kill_select")
-            if st.button("💀 Ghost and Reassign Role"):
+            if st.button("💀 Ghost and Reassign Role", key="force_ghost_btn"):
                 if target_to_kill != "Select":
                     old_role = state["players"][target_to_kill].get("role")
                     state["players"][target_to_kill]["is_alive"] = False
@@ -606,8 +607,8 @@ def display_admin(state):
                     st.rerun()
         with tab_nuke:
             st.warning("⚠️ **DANGER:** This wipes EVERYTHING.")
-            confirm_nuke = st.checkbox("Confirm destruction of all data.")
-            if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke):
+            confirm_nuke = st.checkbox("Confirm destruction of all data.", key="confirm_nuke_check")
+            if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke, key="permanent_reset_btn"):
                 save_state({"players": {}, "used_ids": [], "audit_log": ["🚀 Reset"], "mafia_active": False})
                 if "user" in st.session_state: del st.session_state["user"]
                 st.rerun()
