@@ -549,7 +549,6 @@ def display_admin(state):
 
     # --- TAB 3: SPLIT OR STEAL ---
     with tab_sos:
-        from streamlit_app import admin_sos_panel  # Assuming it is imported or defined
         admin_sos_panel(state)
 
     # --- TAB 4: BROADCAST ---
