@@ -612,7 +612,6 @@ def display_admin(state):
                 save_state({"players": {}, "used_ids": [], "audit_log": ["🚀 Reset"], "mafia_active": False})
                 if "user" in st.session_state: del st.session_state["user"]
                 st.rerun()
-        pass
     
 
 def admin_sos_panel(state):
