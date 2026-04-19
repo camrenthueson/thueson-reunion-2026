@@ -548,6 +548,25 @@ def display_admin(state):
                 save_state(state);
                 st.rerun()
 
+        st.subheader("🛠️ Player Maintenance")
+        with tab_manage:
+            alive_in_game = [p for p, d in state["players"].items() if
+                             d.get("is_alive") and d.get("role") != "Observer"]
+            target_to_kill = st.selectbox("Select Player to 'Ghost'", options=["Select"] + alive_in_game,
+                                          key="force_kill_select")
+            if st.button("💀 Ghost and Reassign Role", key="force_ghost_btn"):
+                if target_to_kill != "Select":
+                    old_role = state["players"][target_to_kill].get("role")
+                    state["players"][target_to_kill]["is_alive"] = False
+                    eligible_heirs = [p for p, d in state["players"].items() if
+                                      d.get("is_alive") and d.get("role") == "Citizen"]
+                    if old_role in ["Doctor", "Detective", "Mafia"] and eligible_heirs:
+                        new_heir = random.choice(eligible_heirs)
+                        state["players"][new_heir]["role"] = old_role
+                        state["mafia_log"].insert(0, f"🎭 ROLE SHIFT: {new_heir} is the new {old_role}!")
+                    save_state(state);
+                    st.rerun()
+
     # --- TAB 3: SPLIT OR STEAL ---
     with tab_sos:
         admin_sos_panel(state)
