@@ -606,12 +606,12 @@ def display_admin(state):
     # --- TAB 6: MAINTENANCE ---
     with tab_sys:
         st.subheader("🛠️ System Maintenance")
-            st.warning("⚠️ **DANGER:** This wipes EVERYTHING.")
-            confirm_nuke = st.checkbox("Confirm destruction of all data.", key="confirm_nuke_check")
-            if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke, key="permanent_reset_btn"):
-                save_state({"players": {}, "used_ids": [], "audit_log": ["🚀 Reset"], "mafia_active": False})
-                if "user" in st.session_state: del st.session_state["user"]
-                st.rerun()
+        st.warning("⚠️ **DANGER:** This wipes EVERYTHING.")
+        confirm_nuke = st.checkbox("Confirm destruction of all data.", key="confirm_nuke_check")
+        if st.button("🔥 PERMANENT SYSTEM RESET", type="primary", disabled=not confirm_nuke, key="permanent_reset_btn"):
+            save_state({"players": {}, "used_ids": [], "audit_log": ["🚀 Reset"], "mafia_active": False})
+            if "user" in st.session_state: del st.session_state["user"]
+            st.rerun()
     
 
 def admin_sos_panel(state):
